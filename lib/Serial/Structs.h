@@ -3,16 +3,26 @@
 
 #include <Arduino.h>
 
-// packet type 1 – data from bulkhead to steeringwheel
-struct Data {
-    int8_t speed;
-} __attribute__((packed));
+enum IndicatorState : uint8_t {
+    INDICATOR_OFF,
+    LEFT,
+    RIGHT,
+    HAZARDS
+};
 
-// packet type 2 – debug mode
-struct MotorCommand {
-    uint8_t motorId;
-    int16_t speed;
-} __attribute__((packed));
+// packet type 1 – data from bulkhead to steeringwheel
+struct __attribute__((packed)) ForwardPacket {
+    uint8_t speed; //mph
+    uint16_t voltage; //volts stored at int, converted from 12.34 to 1234 to save space
+};
+
+// packet type 2 – from steeringwheel to bulkhead
+struct __attribute__((packed)) ReversePacket {
+    IndicatorState indicatorState;
+    bool headlight;
+    bool brake;
+    bool running;
+};
 
 
 #endif
