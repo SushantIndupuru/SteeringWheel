@@ -26,11 +26,11 @@ void handlePacket(uint8_t type, uint8_t *data, uint8_t len) {
 }
 
 bool getBrakePedalState() {
-    return analogRead(A0)<0.5; //TODO: get actual conversion formula and bounds
+    return analogRead(A0)<0.5; //TODO: get actual conversion formula and threshold
 }
 
-void setBatteryLed(bool state) {
-    digitalWrite(LEFT_INDICATOR, state);
+void setBatteryLed(float voltage) {
+    digitalWrite(LEFT_INDICATOR, voltage<12.40); //TODO: get actual threshold
 }
 
 void setDisplaySpeed(uint8_t speed) {
@@ -65,9 +65,10 @@ void loop() {
 
     updatePacket(Serial, handlePacket);
 
-    setDisplayVoltage(decodeFixedToNumber(latestForwardPacket.voltage));
 
-
+    float voltage = decodeFixedToNumber(latestForwardPacket.voltage);
+    setDisplayVoltage(voltage);
+    setBatteryLed(voltage);
 
     switch (lastIndicatorState) {
         case RIGHT: {
