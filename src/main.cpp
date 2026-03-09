@@ -25,6 +25,10 @@ void handlePacket(uint8_t type, uint8_t *data, uint8_t len) {
     }
 }
 
+bool getBrakePedalState() {
+    return analogRead(A0)<0.5; //TODO: get actual conversion formula and bounds
+}
+
 void setBatteryLed(bool state) {
     digitalWrite(LEFT_INDICATOR, state);
 }
@@ -63,8 +67,7 @@ void loop() {
 
     setDisplayVoltage(decodeFixedToNumber(latestForwardPacket.voltage));
 
-    static unsigned long lastReverseSend = 0;
-    unsigned long now = millis();
+
 
     switch (lastIndicatorState) {
         case RIGHT: {
@@ -97,9 +100,13 @@ void loop() {
     } else if (rightIndicator.toggleState()) {
         state = RIGHT;
     }
+    lastIndicatorState = state;
+
+    static unsigned long lastReverseSend = 0;
+    unsigned long now = millis();
     if (now - lastReverseSend >= REVERSE_PACKET_INTERVAL) {
         lastReverseSend = now;
-        ReversePacket packet = {state, headlights.toggleState(), 0, 1};
+        ReversePacket packet = {state, headlights.toggleState(), getBrakePedalState(), true};
         sendPacket(Serial, 1, reinterpret_cast<uint8_t *>(&packet), sizeof(packet));
     }
 }
