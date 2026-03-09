@@ -37,6 +37,7 @@ private:
   bool _toggle;
   uint16_t _debounceMs;
   uint32_t _lastChangeMs;
+  uint64_t _currentMs;
 
   bool _read() const;
 };
