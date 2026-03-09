@@ -4,6 +4,7 @@
 #include <FixedPoint.h>
 #include "ButtonEdge.h"
 #include "Tm1637helper.h"
+#include <Servo.h>
 
 TM1637Helper display(2, 3);
 
@@ -14,7 +15,55 @@ Button leftIndicator(9);
 Button headlights(10);
 Button hazards(11);
 Button wipers(12);
-constexpr uint8_t LEFT_INDICATOR = 13;
+constexpr uint8_t BATTERY_LED = 13;
+
+
+constexpr uint8_t WIPER_SERVO_PIN = 5;
+constexpr int WIPER_POS_MIN = 20;
+constexpr int WIPER_POS_MAX = 160;
+constexpr unsigned long WIPER_SWEEP_TIME_MS = 600;
+
+Servo wiperServo;
+
+void updateWiper(bool enabled) {
+    static bool lastEnabled = false;
+    static bool sweepingUp = true; // true is moving toward max
+    static unsigned long sweepStart = 0;
+    static int sweepFrom = WIPER_POS_MIN;
+    static int sweepTo = WIPER_POS_MAX;
+
+    if (!enabled) {
+        if (lastEnabled) {
+            wiperServo.write(WIPER_POS_MIN);
+        }
+        lastEnabled = false;
+        return;
+    }
+
+    unsigned long now = millis();
+
+    if (!lastEnabled) {
+        sweepingUp = true;
+        sweepFrom = WIPER_POS_MIN;
+        sweepTo = WIPER_POS_MAX;
+        sweepStart = now;
+        wiperServo.write(WIPER_POS_MIN);
+    }
+
+    float t = (float) (now - sweepStart) / (float) WIPER_SWEEP_TIME_MS;
+    if (t >= 1.0f) {
+        sweepingUp = !sweepingUp;
+        sweepFrom = sweepingUp ? WIPER_POS_MIN : WIPER_POS_MAX;
+        sweepTo = sweepingUp ? WIPER_POS_MAX : WIPER_POS_MIN;
+        sweepStart = now;
+        t = 0.0f;
+    }
+
+    int pos = (int) (sweepFrom + t * (sweepTo - sweepFrom));
+    wiperServo.write(pos);
+
+    lastEnabled = true;
+}
 
 ForwardPacket latestForwardPacket{};
 IndicatorState lastIndicatorState = INDICATOR_OFF;
@@ -26,11 +75,11 @@ void handlePacket(uint8_t type, uint8_t *data, uint8_t len) {
 }
 
 bool getBrakePedalState() {
-    return analogRead(A0)<0.5; //TODO: get actual conversion formula and threshold
+    return analogRead(A0) < 0.5; //TODO: get actual conversion formula and threshold
 }
 
 void setBatteryLed(float voltage) {
-    digitalWrite(LEFT_INDICATOR, voltage<12.40); //TODO: get actual threshold
+    digitalWrite(BATTERY_LED, voltage < 12.40); //TODO: get actual threshold
 }
 
 void setDisplaySpeed(uint8_t speed) {
@@ -43,11 +92,15 @@ void setDisplayVoltage(float voltage) {
 
 void setup() {
     Serial.begin(115200);
+    pinMode(BATTERY_LED, OUTPUT);
+    digitalWrite(BATTERY_LED, LOW);
     rightIndicator.begin();
     leftIndicator.begin();
     headlights.begin();
     hazards.begin();
     wipers.begin();
+    wiperServo.attach(WIPER_SERVO_PIN);
+    wiperServo.write(WIPER_POS_MIN);
     display.begin();
 }
 
@@ -65,10 +118,11 @@ void loop() {
 
     updatePacket(Serial, handlePacket);
 
-
     float voltage = decodeFixedToNumber(latestForwardPacket.voltage);
     setDisplayVoltage(voltage);
     setBatteryLed(voltage);
+
+    updateWiper(wipers.toggleState());
 
     switch (lastIndicatorState) {
         case RIGHT: {
@@ -108,6 +162,6 @@ void loop() {
     if (now - lastReverseSend >= REVERSE_PACKET_INTERVAL) {
         lastReverseSend = now;
         ReversePacket packet = {state, headlights.toggleState(), getBrakePedalState(), true};
-        sendPacket(Serial, 1, reinterpret_cast<uint8_t *>(&packet), sizeof(packet));
+        sendPacket(Serial, 2, reinterpret_cast<uint8_t *>(&packet), sizeof(packet));
     }
 }
