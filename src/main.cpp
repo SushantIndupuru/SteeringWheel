@@ -17,6 +17,8 @@ Button hazards(11);
 Button wipers(12);
 constexpr uint8_t BATTERY_LED = 13;
 
+constexpr uint8_t BRAKE_SENSOR = PIN_A0;
+
 
 constexpr uint8_t WIPER_SERVO_PIN = 5;
 constexpr int WIPER_POS_MIN = 20;
@@ -75,7 +77,7 @@ void handlePacket(uint8_t type, uint8_t *data, uint8_t len) {
 }
 
 bool getBrakePedalState() {
-    return analogRead(A0) < 0.5; //TODO: get actual conversion formula and threshold
+    return analogRead(BRAKE_SENSOR) < 0.5; //TODO: get actual conversion formula and threshold
 }
 
 void setBatteryLed(float voltage) {
