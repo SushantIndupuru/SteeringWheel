@@ -15,7 +15,9 @@ Button headlights(10);
 Button hazards(11);
 Button wipers(12);
 constexpr uint8_t LEFT_INDICATOR = 13;
+
 ForwardPacket latestForwardPacket{};
+IndicatorState lastIndicatorState = INDICATOR_OFF;
 
 void handlePacket(uint8_t type, uint8_t *data, uint8_t len) {
     if (type == 1 && len == sizeof(ForwardPacket)) {
@@ -23,12 +25,12 @@ void handlePacket(uint8_t type, uint8_t *data, uint8_t len) {
     }
 }
 
-void setBatterLed(bool state) {
+void setBatteryLed(bool state) {
     digitalWrite(LEFT_INDICATOR, state);
 }
 
 void setDisplaySpeed(uint8_t speed) {
-    display.writeNumber(speed,false);
+    display.writeNumber(speed, false);
 }
 
 void setDisplayVoltage(float voltage) {
@@ -63,6 +65,30 @@ void loop() {
 
     static unsigned long lastReverseSend = 0;
     unsigned long now = millis();
+
+    switch (lastIndicatorState) {
+        case RIGHT: {
+            if (leftIndicator.toggleState() || hazards.toggleState()) {
+                rightIndicator.resetToggle();
+            }
+            break;
+        }
+        case LEFT: {
+            if (rightIndicator.toggleState() || hazards.toggleState()) {
+                leftIndicator.resetToggle();
+            }
+            break;
+        }
+        case HAZARDS: {
+            if (rightIndicator.toggleState() || leftIndicator.toggleState()) {
+                hazards.resetToggle();
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
     IndicatorState state = INDICATOR_OFF;
     if (hazards.toggleState()) {
         state = HAZARDS;
