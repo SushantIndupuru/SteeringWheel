@@ -13,9 +13,9 @@ public:
 
   void update();
 
-  bool rose() const;
+  bool wasPressed() const;
 
-  bool fell() const;
+  bool wasReleased() const;
 
   bool held() const;
 

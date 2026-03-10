@@ -9,6 +9,7 @@
 TM1637Helper display(2, 3);
 
 constexpr unsigned long REVERSE_PACKET_INTERVAL = 50; // ~20Hz
+constexpr unsigned long DEBUG_COMBO_WINDOW_MS = 500;
 
 Button rightIndicator(8);
 Button leftIndicator(9);
@@ -25,7 +26,13 @@ constexpr int WIPER_POS_MIN = 20;
 constexpr int WIPER_POS_MAX = 160;
 constexpr unsigned long WIPER_SWEEP_TIME_MS = 600;
 
+
 Servo wiperServo;
+
+bool debugMode = false;
+static unsigned long hazardsPressedAt = 0;
+static unsigned long headlightsPressedAt = 0;
+static unsigned long wipersPressedAt = 0;
 
 void updateWiper(bool enabled) {
     static bool lastEnabled = false;
@@ -108,20 +115,49 @@ void setup() {
 
 void loop() {
     rightIndicator.update();
-    rightIndicator.toggle();
     leftIndicator.update();
-    leftIndicator.toggle();
     headlights.update();
-    headlights.toggle();
     hazards.update();
-    hazards.toggle();
     wipers.update();
+
+    if (hazards.wasPressed()) hazardsPressedAt = millis();
+    if (headlights.wasPressed()) headlightsPressedAt = millis();
+    if (wipers.wasPressed()) wipersPressedAt = millis();
+
+    rightIndicator.toggle();
+    leftIndicator.toggle();
+    headlights.toggle();
+    hazards.toggle();
     wipers.toggle();
+
+
+    unsigned long now = millis();
+    if (hazardsPressedAt > 0 && headlightsPressedAt > 0 && wipersPressedAt > 0) {
+        unsigned long earliest = min(hazardsPressedAt, min(headlightsPressedAt, wipersPressedAt));
+        unsigned long latest = max(hazardsPressedAt, max(headlightsPressedAt, wipersPressedAt));
+        if (latest - earliest <= DEBUG_COMBO_WINDOW_MS && now - latest < DEBUG_COMBO_WINDOW_MS) {
+            debugMode = !debugMode;
+            hazards.resetToggle();
+            headlights.resetToggle();
+            wipers.resetToggle();
+            hazardsPressedAt = 0;
+            headlightsPressedAt = 0;
+            wipersPressedAt = 0;
+        } else if (now - earliest > DEBUG_COMBO_WINDOW_MS) {
+            hazardsPressedAt = 0;
+            headlightsPressedAt = 0;
+            wipersPressedAt = 0;
+        }
+    }
 
     updatePacket(Serial, handlePacket);
 
-    float voltage = decodeFixedToNumber(latestForwardPacket.voltage);
-    setDisplayVoltage(voltage);
+    const float voltage = decodeFixedToNumber(latestForwardPacket.voltage);
+    if (debugMode) {
+        setDisplayVoltage(voltage);
+    } else {
+        setDisplaySpeed(latestForwardPacket.speed);
+    }
     setBatteryLed(voltage);
 
     updateWiper(wipers.toggleState());
@@ -160,7 +196,6 @@ void loop() {
     lastIndicatorState = state;
 
     static unsigned long lastReverseSend = 0;
-    unsigned long now = millis();
     if (now - lastReverseSend >= REVERSE_PACKET_INTERVAL) {
         lastReverseSend = now;
         ReversePacket packet = {state, headlights.toggleState(), getBrakePedalState(), true};

@@ -24,14 +24,14 @@ void Button::update() {
     }
 }
 
-bool Button::rose() const { return _current && !_last; }
-bool Button::fell() const { return !_current && _last; }
+bool Button::wasPressed() const { return _current && !_last; }
+bool Button::wasReleased() const { return !_current && _last; }
 bool Button::held() const { return _current; }
-bool Button::rising() const { return rose(); }
-bool Button::falling() const { return fell(); }
+bool Button::rising() const { return wasPressed(); }
+bool Button::falling() const { return wasReleased(); }
 
 bool Button::toggle() {
-    if (rose()) _toggle = !_toggle;
+    if (wasPressed()) _toggle = !_toggle;
     return _toggle;
 }
 
