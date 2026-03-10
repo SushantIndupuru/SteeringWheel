@@ -18,6 +18,8 @@ public:
     // Write a float, with specified decimal places (0–3)
     void writeFloat(float number, uint8_t decimalPlaces = 1);
 
+    void writeTime(uint8_t hours, uint8_t minutes);
+
     // Clear the display
     void clear();
 

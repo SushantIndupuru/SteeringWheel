@@ -89,7 +89,7 @@ void setDisplaySpeed(uint8_t speed) {
 }
 
 void setDisplayVoltage(float voltage) {
-    display.writeFloat(voltage, 2);
+    display.writeFloat(12, 1);
 }
 
 void setup() {
