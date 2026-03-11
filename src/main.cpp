@@ -84,7 +84,7 @@ void handlePacket(uint8_t type, uint8_t *data, uint8_t len) {
 }
 
 bool getBrakePedalState() {
-    return analogRead(BRAKE_SENSOR) < 0.5; //TODO: get actual conversion formula and threshold
+    return analogRead(BRAKE_SENSOR) < 512; //TODO: get actual conversion formula and threshold
 }
 
 void setBatteryLed(float voltage) {
@@ -100,7 +100,7 @@ void setDisplayVoltage(float voltage) {
 }
 
 void setup() {
-    Serial.begin(115200);
+    Serial.begin(9600);
     pinMode(BATTERY_LED, OUTPUT);
     digitalWrite(BATTERY_LED, LOW);
     rightIndicator.begin();
