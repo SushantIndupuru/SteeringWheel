@@ -18,6 +18,7 @@ Button hazards(11);
 Button wipers(12);
 constexpr uint8_t BATTERY_LED = 13;
 
+
 constexpr uint8_t BRAKE_SENSOR = PIN_A0;
 
 
@@ -25,6 +26,7 @@ constexpr uint8_t WIPER_SERVO_PIN = 5;
 constexpr int WIPER_POS_MIN = 20;
 constexpr int WIPER_POS_MAX = 160;
 constexpr unsigned long WIPER_SWEEP_TIME_MS = 600;
+constexpr unsigned long BATTERY_FLASH_INTERVAL_MS = 350;
 
 
 Servo wiperServo;
@@ -88,7 +90,15 @@ bool getBrakePedalState() {
 }
 
 void setBatteryLed(float voltage) {
-    digitalWrite(BATTERY_LED, voltage < 12.40); //TODO: get actual threshold
+    if (voltage < 12.30) {
+        // Flash at ~2Hz when critically low
+        digitalWrite(BATTERY_LED, (millis() / BATTERY_FLASH_INTERVAL_MS) % 2 == 0);
+    } else if (voltage < 12.40) {
+        // Solid on when low
+        digitalWrite(BATTERY_LED, HIGH);
+    } else {
+        digitalWrite(BATTERY_LED, LOW);
+    }
 }
 
 void setDisplaySpeed(uint8_t speed) {
