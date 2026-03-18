@@ -19,7 +19,7 @@ Button wipers(12);
 constexpr uint8_t BATTERY_LED = 13;
 
 
-constexpr uint8_t BRAKE_SENSOR = PIN_A0;
+constexpr uint8_t BRAKE_SENSOR = A0;
 
 
 constexpr uint8_t WIPER_SERVO_PIN = 5;
