@@ -61,7 +61,7 @@ void updateWiper(bool enabled) {
         wiperServo.write(WIPER_POS_MIN);
     }
 
-    float t = (float) (now - sweepStart) / (float) WIPER_SWEEP_TIME_MS;
+    float t = static_cast<float>(now - sweepStart) / static_cast<float>(WIPER_SWEEP_TIME_MS);
     if (t >= 1.0f) {
         sweepingUp = !sweepingUp;
         sweepFrom = sweepingUp ? WIPER_POS_MIN : WIPER_POS_MAX;
@@ -70,7 +70,7 @@ void updateWiper(bool enabled) {
         t = 0.0f;
     }
 
-    int pos = (int) (sweepFrom + t * (sweepTo - sweepFrom));
+    int pos = static_cast<int>(sweepFrom + t * (sweepTo - sweepFrom));
     wiperServo.write(pos);
 
     lastEnabled = true;
