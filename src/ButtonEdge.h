@@ -1,32 +1,21 @@
 #pragma once
 #include <Arduino.h>
+#include <new>
 
 class Button {
 public:
-  Button() : _pin(0), _mode(INPUT_PULLUP), _current(false), _last(false), _toggle(false), _debounceMs(20),
-             _lastChangeMs(0) {
-  }
-
+  Button() = delete;
   Button(uint8_t pin, uint8_t mode = INPUT_PULLUP, uint16_t debounceMs = 50);
 
   void begin();
-
   void update();
-
   bool wasPressed() const;
-
   bool wasReleased() const;
-
   bool held() const;
-
   bool rising() const;
-
   bool falling() const;
-
   bool toggle();
-
   bool toggleState() const;
-
   void resetToggle();
 
 private:
@@ -46,21 +35,26 @@ template<uint8_t N>
 class ButtonArray {
 public:
   ButtonArray(const uint8_t pins[N], uint8_t mode = INPUT_PULLUP) {
-    for (uint8_t i = 0; i < N; i++)
-      _btns[i] = Button(pins[i], mode);
+    for (uint8_t i = 0; i < N; i++) {
+      new (&_storage[i]) Button(pins[i], mode);
+    }
   }
 
   void begin() {
-    for (uint8_t i = 0; i < N; i++) _btns[i].begin();
+    for (uint8_t i = 0; i < N; i++) btn(i).begin();
   }
 
   void update() {
-    for (uint8_t i = 0; i < N; i++) _btns[i].update();
+    for (uint8_t i = 0; i < N; i++) btn(i).update();
   }
 
-  Button &operator[](uint8_t i) { return _btns[i]; }
+  Button &operator[](uint8_t i) { return btn(i); }
   uint8_t size() const { return N; }
 
 private:
-  Button _btns[N];
+  alignas(Button) uint8_t _storage[N][sizeof(Button)];
+
+  Button &btn(uint8_t i) {
+    return *reinterpret_cast<Button*>(&_storage[i]);
+  }
 };
