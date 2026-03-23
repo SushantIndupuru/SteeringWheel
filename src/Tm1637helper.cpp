@@ -1,16 +1,16 @@
 #include "TM1637Helper.h"
 
-TM1637Helper::TM1637Helper(uint8_t clkPin, uint8_t dioPin)
+TM1637Helper::TM1637Helper(const uint8_t clkPin, const uint8_t dioPin)
     : _display(clkPin, dioPin) {
 }
 
-void TM1637Helper::begin(uint8_t brightness) {
+void TM1637Helper::begin(const uint8_t brightness) {
     _display.setBrightness(brightness);
     _display.clear();
 }
 
-void TM1637Helper::writeNumber(int number, bool leadingZeros) {
-    bool negative = number < 0;
+void TM1637Helper::writeNumber(int number, const bool leadingZeros) {
+    const bool negative = number < 0;
 
     if (negative) {
         number = -number;
@@ -20,7 +20,7 @@ void TM1637Helper::writeNumber(int number, bool leadingZeros) {
         uint8_t segments[4];
         segments[0] = SEG_G;
         segments[1] = _display.encodeDigit(number / 100);
-        segments[2] = _display.encodeDigit((number / 10) % 10);
+        segments[2] = _display.encodeDigit(number / 10 % 10);
         segments[3] = _display.encodeDigit(number % 10);
         _display.setSegments(segments);
     } else {
@@ -30,24 +30,24 @@ void TM1637Helper::writeNumber(int number, bool leadingZeros) {
 }
 
 
-void TM1637Helper::writeFloat(float number, uint8_t decimalPlaces) {
+void TM1637Helper::writeFloat(const float number, uint8_t decimalPlaces) {
     if (decimalPlaces > 2) decimalPlaces = 2;
     if (decimalPlaces == 1) decimalPlaces = 2;
 
     int multiplier = 1;
     for (uint8_t i = 0; i < decimalPlaces; i++) multiplier *= 10;
 
-    int scaled = (int) round(number * multiplier);
+    int scaled = static_cast<int>(round(number * multiplier));
 
-    bool negative = scaled < 0;
+    const bool negative = scaled < 0;
     if (negative) scaled = -scaled;
 
     if (scaled > 9999) scaled = 9999;
 
-    int d0 = (scaled / 1000) % 10;
-    int d1 = (scaled / 100)  % 10;
-    int d2 = (scaled / 10)   % 10;
-    int d3 = (scaled / 1)    % 10;
+    const int d0 = scaled / 1000 % 10;
+    const int d1 = scaled / 100  % 10;
+    const int d2 = scaled / 10   % 10;
+    const int d3 = scaled / 1    % 10;
 
     uint8_t segments[4];
 
@@ -63,7 +63,7 @@ void TM1637Helper::writeFloat(float number, uint8_t decimalPlaces) {
         segments[3] = _display.encodeDigit(d3);
     }
 
-    bool showColon = (decimalPlaces == 2);
+    const bool showColon = decimalPlaces == 2;
     if (showColon) {
         segments[1] |= 0x80;
     }
@@ -87,6 +87,6 @@ void TM1637Helper::clear() {
     _display.clear();
 }
 
-void TM1637Helper::setBrightness(uint8_t brightness) {
+void TM1637Helper::setBrightness(const uint8_t brightness) {
     _display.setBrightness(brightness);
 }

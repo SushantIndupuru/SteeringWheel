@@ -5,7 +5,8 @@
 class Button {
 public:
   Button() = delete;
-  Button(uint8_t pin, uint8_t mode = INPUT_PULLUP, uint16_t debounceMs = 50);
+
+  explicit Button(uint8_t pin, uint8_t mode = INPUT_PULLUP, uint16_t debounceMs = 50);
 
   void begin();
   void update();
@@ -26,7 +27,7 @@ private:
   bool _toggle;
   uint16_t _debounceMs;
   uint32_t _lastChangeMs;
-  uint64_t _currentMs;
+  uint64_t _currentMs{};
 
   bool _read() const;
 };
@@ -34,7 +35,7 @@ private:
 template<uint8_t N>
 class ButtonArray {
 public:
-  ButtonArray(const uint8_t pins[N], uint8_t mode = INPUT_PULLUP) {
+  explicit ButtonArray(const uint8_t pins[N], uint8_t mode = INPUT_PULLUP) {
     for (uint8_t i = 0; i < N; i++) {
       new (&_storage[i]) Button(pins[i], mode);
     }
@@ -48,11 +49,11 @@ public:
     for (uint8_t i = 0; i < N; i++) btn(i).update();
   }
 
-  Button &operator[](uint8_t i) { return btn(i); }
-  uint8_t size() const { return N; }
+  Button &operator[](const uint8_t i) { return btn(i); }
+  static uint8_t size() { return N; }
 
 private:
-  alignas(Button) uint8_t _storage[N][sizeof(Button)];
+  alignas(Button) uint8_t _storage[N][sizeof(Button)]{};
 
   Button &btn(uint8_t i) {
     return *reinterpret_cast<Button*>(&_storage[i]);

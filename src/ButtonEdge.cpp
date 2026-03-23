@@ -1,6 +1,6 @@
 #include "ButtonEdge.h"
 
-Button::Button(uint8_t pin, uint8_t mode, uint16_t debounceMs)
+Button::Button(const uint8_t pin, const uint8_t mode, const uint16_t debounceMs)
     : _pin(pin), _mode(mode), _current(false), _last(false), _toggle(false),
       _debounceMs(debounceMs), _lastChangeMs(0) {
 }
@@ -12,10 +12,10 @@ void Button::begin() {
 }
 
 void Button::update() {
-    bool raw = _read();
-    uint32_t now = millis();
+    const bool raw = _read();
+    const uint32_t now = millis();
 
-    if (raw != _current && (now - _lastChangeMs) >= _debounceMs) {
+    if (raw != _current && now - _lastChangeMs >= _debounceMs) {
         _last = _current;
         _current = raw;
         _lastChangeMs = now;
@@ -39,6 +39,6 @@ bool Button::toggleState() const { return _toggle; }
 void Button::resetToggle() { _toggle = false; }
 
 bool Button::_read() const {
-    bool raw = digitalRead(_pin);
-    return (_mode == INPUT_PULLUP) ? !raw : raw;
+    const bool raw = digitalRead(_pin);
+    return _mode == INPUT_PULLUP ? !raw : raw;
 }

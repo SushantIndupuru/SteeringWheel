@@ -44,15 +44,15 @@ ForwardPacket latestForwardPacket{};
 IndicatorState lastIndicatorState = INDICATOR_OFF;
 
 bool checkDebugCombo() {
-    unsigned long now = millis();
+    const unsigned long now = millis();
 
     if (hazards.wasPressed()) hazardsPressedAt = now;
     if (headlights.wasPressed()) headlightsPressedAt = now;
     if (wipers.wasPressed()) wipersPressedAt = now;
 
     if (hazardsPressedAt > 0 && headlightsPressedAt > 0 && wipersPressedAt > 0) {
-        unsigned long earliest = min(hazardsPressedAt, min(headlightsPressedAt, wipersPressedAt));
-        unsigned long latest = max(hazardsPressedAt, max(headlightsPressedAt, wipersPressedAt));
+        const unsigned long earliest = min(hazardsPressedAt, min(headlightsPressedAt, wipersPressedAt));
+        const unsigned long latest = max(hazardsPressedAt, max(headlightsPressedAt, wipersPressedAt));
 
         if (latest - earliest <= DEBUG_COMBO_WINDOW_MS && now - latest < DEBUG_COMBO_WINDOW_MS) {
             debugMode = !debugMode;
@@ -81,7 +81,7 @@ void handleButtons() {
 }
 
 
-void updateWiper(bool enabled) {
+void updateWiper(const bool enabled) {
     static bool lastEnabled = false;
     static bool sweepingUp = true; //true is moving toward max
     static unsigned long sweepStart = 0;
@@ -94,7 +94,7 @@ void updateWiper(bool enabled) {
         return;
     }
 
-    unsigned long now = millis();
+    const unsigned long now = millis();
 
     if (!lastEnabled) {
         sweepingUp = true;
@@ -118,7 +118,7 @@ void updateWiper(bool enabled) {
 }
 
 
-void handlePacket(uint8_t type, const uint8_t *data, uint8_t len) {
+void handlePacket(const uint8_t type, const uint8_t *data, const uint8_t len) {
     if (type == 1 && len == sizeof(ForwardPacket)) {
         memcpy(&latestForwardPacket, data, sizeof(ForwardPacket));
     }
@@ -128,9 +128,9 @@ bool getBrakePedalState() {
     return analogRead(BRAKE_SENSOR) < 512; //TODO: get actual conversion formula and threshold
 }
 
-void setBatteryLed(float voltage) {
+void setBatteryLed(const float voltage) {
     if (voltage < 12.30f) {
-        digitalWrite(BATTERY_LED, (millis() / BATTERY_FLASH_INTERVAL_MS) % 2 == 0);
+        digitalWrite(BATTERY_LED, millis() / BATTERY_FLASH_INTERVAL_MS % 2 == 0);
     } else if (voltage < 12.40f) {
         digitalWrite(BATTERY_LED, HIGH);
     } else {
@@ -221,10 +221,10 @@ void loop() {
     }
 
     static unsigned long lastReverseSend = 0;
-    unsigned long now = millis();
+    const unsigned long now = millis();
     if (now - lastReverseSend >= REVERSE_PACKET_INTERVAL) {
         lastReverseSend = now;
-        IndicatorState state = debugMode ? INDICATOR_OFF : lastIndicatorState;
+        const IndicatorState state = debugMode ? INDICATOR_OFF : lastIndicatorState;
         ReversePacket packet = {state, headlights.toggleState(), getBrakePedalState(), true, starterState};
         starterState = false;
         sendPacket(Serial, 2, reinterpret_cast<uint8_t *>(&packet), sizeof(packet));
