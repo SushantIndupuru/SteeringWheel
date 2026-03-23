@@ -29,7 +29,8 @@ constexpr uint8_t WIPER_SERVO_PIN = 5;
 //states
 enum DebugStates : uint8_t {
     VOLTAGE,
-    BRAKE_SENSOR_READ
+    BRAKE_SENSOR_READ,
+    DISPLAY_TEST
 };
 
 bool debugMode = false;
@@ -187,9 +188,13 @@ void loop() {
         switch (lastDebugState) {
             case VOLTAGE:
                 display.writeFloat(voltage, 2);
+                break;
             case BRAKE_SENSOR_READ:
                 display.writeNumber(analogRead(BRAKE_SENSOR), true);
                 break;
+            case DISPLAY_TEST:
+                display.writeFloat(88.88,2);
+                 break;
         }
     } else {
         if (!comboFired) {
