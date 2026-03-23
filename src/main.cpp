@@ -6,42 +6,40 @@
 #include "Tm1637helper.h"
 #include <Servo.h>
 
-TM1637Helper display(2, 3);
-
+//constants
+constexpr int WIPER_POS_MIN = 20;
+constexpr int WIPER_POS_MAX = 160;
+constexpr unsigned long WIPER_SWEEP_TIME_MS = 600;
+constexpr unsigned long BATTERY_FLASH_INTERVAL_MS = 350;
 constexpr unsigned long REVERSE_PACKET_INTERVAL = 50; // ~20Hz
 constexpr unsigned long DEBUG_COMBO_WINDOW_MS = 500;
 
+//hardware
+TM1637Helper display(2, 3);
 Button rightIndicator(8);
 Button leftIndicator(9);
 Button headlights(10);
 Button hazards(11);
 Button wipers(12);
-
+Servo wiperServo;
 constexpr uint8_t BATTERY_LED = 13;
 constexpr uint8_t BRAKE_SENSOR = A0;
 constexpr uint8_t WIPER_SERVO_PIN = 5;
-constexpr int WIPER_POS_MIN = 20;
-constexpr int WIPER_POS_MAX = 160;
-constexpr unsigned long WIPER_SWEEP_TIME_MS = 600;
-constexpr unsigned long BATTERY_FLASH_INTERVAL_MS = 350;
 
-Servo wiperServo;
-
-static bool debugMode = false;
-static bool starterState = false;
-static unsigned long hazardsPressedAt = 0;
-static unsigned long headlightsPressedAt = 0;
-static unsigned long wipersPressedAt = 0;
-
+//states
 enum DebugStates : uint8_t {
     VOLTAGE,
     BRAKE_SENSOR_READ
 };
 
-DebugStates lastDebugState = VOLTAGE;
+bool debugMode = false;
+bool starterState = false;
+unsigned long hazardsPressedAt = 0;
+unsigned long headlightsPressedAt = 0;
+unsigned long wipersPressedAt = 0;
 
+//packet
 ForwardPacket latestForwardPacket{};
-IndicatorState lastIndicatorState = INDICATOR_OFF;
 
 bool checkDebugCombo() {
     const unsigned long now = millis();
@@ -153,6 +151,9 @@ void setup() {
 }
 
 void loop() {
+    static DebugStates lastDebugState = VOLTAGE;
+    static IndicatorState lastIndicatorState = INDICATOR_OFF;
+
     rightIndicator.update();
     leftIndicator.update();
     headlights.update();
