@@ -118,7 +118,7 @@ void updateWiper(bool enabled) {
 }
 
 
-void handlePacket(uint8_t type, uint8_t *data, uint8_t len) {
+void handlePacket(uint8_t type, const uint8_t *data, uint8_t len) {
     if (type == 1 && len == sizeof(ForwardPacket)) {
         memcpy(&latestForwardPacket, data, sizeof(ForwardPacket));
     }
@@ -159,7 +159,7 @@ void loop() {
     hazards.update();
     wipers.update();
 
-    bool comboFired = checkDebugCombo();
+    const bool comboFired = checkDebugCombo();
 
     updatePacket(Serial, handlePacket);
 
