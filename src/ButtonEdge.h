@@ -9,14 +9,23 @@ public:
   explicit Button(uint8_t pin, uint8_t mode = INPUT_PULLUP, uint16_t debounceMs = 50);
 
   void begin();
+
   void update();
+
   bool wasPressed() const;
+
   bool wasReleased() const;
+
   bool held() const;
+
   bool rising() const;
+
   bool falling() const;
+
   bool toggle();
+
   bool toggleState() const;
+
   void resetToggle();
 
 private:
@@ -37,7 +46,7 @@ class ButtonArray {
 public:
   explicit ButtonArray(const uint8_t pins[N], uint8_t mode = INPUT_PULLUP) {
     for (uint8_t i = 0; i < N; i++) {
-      new (&_storage[i]) Button(pins[i], mode);
+      new(&_storage[i]) Button(pins[i], mode);
     }
   }
 
@@ -56,6 +65,6 @@ private:
   alignas(Button) uint8_t _storage[N][sizeof(Button)]{};
 
   Button &btn(uint8_t i) {
-    return *reinterpret_cast<Button*>(&_storage[i]);
+    return *reinterpret_cast<Button *>(&_storage[i]);
   }
 };

@@ -45,9 +45,9 @@ void TM1637Helper::writeFloat(const float number, uint8_t decimalPlaces) {
     if (scaled > 9999) scaled = 9999;
 
     const int d0 = scaled / 1000 % 10;
-    const int d1 = scaled / 100  % 10;
-    const int d2 = scaled / 10   % 10;
-    const int d3 = scaled / 1    % 10;
+    const int d1 = scaled / 100 % 10;
+    const int d2 = scaled / 10 % 10;
+    const int d3 = scaled / 1 % 10;
 
     uint8_t segments[4];
 
@@ -72,7 +72,7 @@ void TM1637Helper::writeFloat(const float number, uint8_t decimalPlaces) {
 }
 
 void TM1637Helper::writeTime(uint8_t hours, uint8_t minutes) {
-    if (hours   > 99) hours   = 99;
+    if (hours > 99) hours = 99;
     if (minutes > 59) minutes = 59;
 
     uint8_t segments[4];
