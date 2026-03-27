@@ -1,9 +1,9 @@
-#include <Arduino.h>
 #include <SerialPacketFunctions.h>
-#include <Structs.h>
-#include <FixedPoint.h>
-#include "ButtonEdge.h"
 #include "Tm1637helper.h"
+#include "ButtonEdge.h"
+#include <FixedPoint.h>
+#include <Arduino.h>
+#include <Structs.h>
 #include <Servo.h>
 
 //constants

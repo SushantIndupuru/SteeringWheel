@@ -1,5 +1,4 @@
-#ifndef TM1637_HELPER_H
-#define TM1637_HELPER_H
+#pragma once
 
 #include <Arduino.h>
 #include <TM1637Display.h>
@@ -30,5 +29,3 @@ public:
 private:
     TM1637Display _display;
 };
-
-#endif
