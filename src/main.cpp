@@ -124,7 +124,7 @@ void handlePacket(const uint8_t type, const uint8_t *data, const uint8_t len) {
 }
 
 bool getBrakePedalState() {
-    return analogRead(BRAKE_SENSOR) < 512; //TODO: get actual conversion formula and threshold
+    return analogRead(BRAKE_SENSOR) < 595; //TODO: get actual threshold
 }
 
 void setBatteryLed(const float voltage) {
@@ -181,6 +181,9 @@ void loop() {
         if (wipers.wasPressed()) {
             lastDebugState = BRAKE_SENSOR_READ;
         }
+        if (hazards.wasPressed()) {
+            lastDebugState = DISPLAY_TEST;
+        }
         if (leftIndicator.held() && rightIndicator.held()) {
             starterState = true;
         }
@@ -193,8 +196,8 @@ void loop() {
                 display.writeNumber(analogRead(BRAKE_SENSOR), true);
                 break;
             case DISPLAY_TEST:
-                display.writeFloat(88.88,2);
-                 break;
+                display.writeFloat(88.88, 2);
+                break;
         }
     } else {
         if (!comboFired) {
