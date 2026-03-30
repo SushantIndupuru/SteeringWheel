@@ -90,3 +90,7 @@ void TM1637Helper::clear() {
 void TM1637Helper::setBrightness(const uint8_t brightness) {
     _display.setBrightness(brightness);
 }
+
+void TM1637Helper::writeRaw(const uint8_t segments[4]) {
+    _display.setSegments(segments);
+}

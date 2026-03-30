@@ -5,11 +5,12 @@
 #include <Arduino.h>
 #include <Structs.h>
 #include <Servo.h>
+#include <TM1637Display.h>
 
 //constants
-constexpr int WIPER_POS_MIN = 20;
-constexpr int WIPER_POS_MAX = 160;
-constexpr unsigned long WIPER_SWEEP_TIME_MS = 600;
+constexpr int WIPER_POS_MIN = 21;
+constexpr int WIPER_POS_MAX = 50;
+constexpr unsigned long WIPER_SWEEP_TIME_MS = 500;
 constexpr unsigned long BATTERY_FLASH_INTERVAL_MS = 350;
 constexpr unsigned long REVERSE_PACKET_INTERVAL = 50; // ~20Hz
 constexpr unsigned long DEBUG_COMBO_WINDOW_MS = 500;
@@ -124,7 +125,7 @@ void handlePacket(const uint8_t type, const uint8_t *data, const uint8_t len) {
 }
 
 bool getBrakePedalState() {
-    return analogRead(BRAKE_SENSOR) < 595; //TODO: get actual threshold
+    return analogRead(BRAKE_SENSOR) < 630; //TODO: get actual threshold
 }
 
 void setBatteryLed(const float voltage) {
@@ -140,7 +141,7 @@ void setBatteryLed(const float voltage) {
 void setup() {
     Serial.begin(9600);
     pinMode(BATTERY_LED, OUTPUT);
-    digitalWrite(BATTERY_LED, LOW);
+    digitalWrite(BATTERY_LED, HIGH);
     rightIndicator.begin();
     leftIndicator.begin();
     headlights.begin();
@@ -149,6 +150,17 @@ void setup() {
     wiperServo.attach(WIPER_SERVO_PIN);
     wiperServo.write(WIPER_POS_MIN);
     display.begin();
+
+    // Show "tEC " on startup for 5 seconds
+    static constexpr uint8_t startupSegs[4] = {
+        0x00, // blank
+        SEG_D | SEG_E | SEG_F | SEG_G, // t
+        SEG_A | SEG_D | SEG_E | SEG_F | SEG_G, // E
+        SEG_A | SEG_D | SEG_E | SEG_F, // C
+    };
+    display.writeRaw(startupSegs);
+    delay(3000);
+    digitalWrite(BATTERY_LED, LOW);
 }
 
 void loop() {

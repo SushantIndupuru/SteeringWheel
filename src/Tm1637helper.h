@@ -26,6 +26,8 @@ public:
     //set brightness (0x00–0x0f)
     void setBrightness(uint8_t brightness);
 
+
+    void writeRaw(const uint8_t segments[4]);
 private:
     TM1637Display _display;
 };
