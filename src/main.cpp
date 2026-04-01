@@ -6,6 +6,7 @@
 #include <Structs.h>
 #include <Servo.h>
 #include <TM1637Display.h>
+#include "OledDisplay.h"
 
 //constants
 constexpr int WIPER_POS_MIN = 21;
@@ -140,6 +141,15 @@ void setBatteryLed(const float voltage) {
 
 void setup() {
     Serial.begin(9600);
+    Wire.begin();
+    display.begin();
+    display.setBrightness(7);
+    if (!oledDisplay.begin()) {
+        Serial.println("OLED FAIL");
+        while (true);
+    }
+    oledDisplay.setBrightness(15);
+    oledDisplay.showRaw("TEC", "STARTING...");
     pinMode(BATTERY_LED, OUTPUT);
     digitalWrite(BATTERY_LED, HIGH);
     rightIndicator.begin();
@@ -149,9 +159,7 @@ void setup() {
     wipers.begin();
     wiperServo.attach(WIPER_SERVO_PIN);
     wiperServo.write(WIPER_POS_MIN);
-    display.begin();
 
-    // Show "tEC " on startup for 5 seconds
     static constexpr uint8_t startupSegs[4] = {
         0x00, // blank
         SEG_D | SEG_E | SEG_F | SEG_G, // t
@@ -161,6 +169,8 @@ void setup() {
     display.writeRaw(startupSegs);
     delay(3000);
     digitalWrite(BATTERY_LED, LOW);
+    oledDisplay.showRaw("", "");
+    oledDisplay.setYellow("SYSTEM OK");
 }
 
 void loop() {
