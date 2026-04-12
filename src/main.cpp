@@ -145,7 +145,6 @@
     }
 
     void setBatteryLed(const float voltage) {
-        return;
         if (voltage < 12.30f) {
             digitalWrite(BATTERY_LED, millis() / BATTERY_FLASH_INTERVAL_MS % 2 == 0);
         } else if (voltage < 12.40f) {
@@ -206,50 +205,22 @@
         setBatteryLed(voltage);
         display2.writeFloat(decodeFixedToNumber(latestForwardPacket.temperature));
 
-        /*if (start.held()) {
-            starterState = true;
-            digitalWrite(BATTERY_LED, HIGH);
-        } else {
-            starterState = false;
-            digitalWrite(BATTERY_LED, LOW);
-        }*/
-
-
         if (stop.wasPressed()) {
             engineState = OFF;
             ignitionState = false;
             starterState = false;
-            digitalWrite(BATTERY_LED, LOW);
             start.resetToggle(); // prevent auto-restart since toggleState() stays true
         }
-
-        /*// Engine start sequence state machine
-        if (engineState == STARTING) {
-            digitalWrite(BATTERY_LED, HIGH);
-            const unsigned long elapsed = millis() - engineStartTime;
-            if (elapsed >= 2000 && elapsed < 4000) {
-                starterState = true;
-            } else if (elapsed >= 9000) {
-                starterState = false;
-                engineState = ON;
-            }
-        }
-        if (engineState==STARTING) {
-            digitalWrite(BATTERY_LED, LOW);
-            starterState = false;
-        }*/
 
         switch (engineState) {
             case OFF:
                 if (start.toggleState()) {
-                    digitalWrite(BATTERY_LED, HIGH);
                     ignitionState = true;
                     starterState = false;
                     engineStartTime = millis();
                     engineState = PRIMING;
-                } else {
-                    digitalWrite(BATTERY_LED, LOW);
                 }
+
                 break;
             case PRIMING: {
                 ignitionState = true;
