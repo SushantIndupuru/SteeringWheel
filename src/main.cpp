@@ -141,7 +141,7 @@
     }
 
     bool getBrakePedalState() {
-        return analogRead(BRAKE_SENSOR) < 630; //TODO: get actual threshold
+        return analogRead(BRAKE_SENSOR) < 630;
     }
 
     void setBatteryLed(const float voltage) {
